@@ -1,0 +1,318 @@
+{
+  "name": "Automated Social Media Content Creation – Master AI",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "seconds",
+              "secondsInterval": 300
+            }
+          ]
+        }
+      },
+      "id": "trigger",
+      "name": "Scheduled Trigger (Every 5 min)",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "market-analyzer",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "call-market-analyzer",
+      "name": "Execute Market Analyzer",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "script-writer",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "call-script-writer",
+      "name": "Execute Script Writer",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "parallel": true
+      },
+      "id": "parallel-1",
+      "name": "Parallel (Assets)",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 1,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "image-generator",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "call-image-gen",
+      "name": "Execute Image Generator",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [850, 200]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "video-clips-generator",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "call-video-clip-gen",
+      "name": "Execute Video Clips Generator",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "online-collector",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "call-online-collector",
+      "name": "Execute Online Collector",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [850, 400]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "audio-collector",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "call-audio-collector",
+      "name": "Execute Audio Collector",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [850, 500]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "voice-over-ai",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "call-voice-over",
+      "name": "Execute Voice-Over AI",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [850, 600]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "video-editor",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "call-video-editor",
+      "name": "Execute Video Editor",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "online-uploader",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "call-uploader",
+      "name": "Execute Online Uploader",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [1250, 300]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "social-analyzer",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "call-social-analyzer",
+      "name": "Execute Social Analyzer",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [1450, 300]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "sheetId": "YOUR_GOOGLE_SHEET_ID",
+        "range": "A:F",
+        "options": {
+          "valueInputMode": "userEntered"
+        }
+      },
+      "id": "update-sheet",
+      "name": "Update Google Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 2,
+      "position": [1250, 450]
+    },
+    {
+      "parameters": {
+        "toEmail": "your@email.com",
+        "subject": "Video Posted",
+        "text": "Your automated video has been successfully posted to social media."
+      },
+      "id": "send-mail",
+      "name": "Send Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [1250, 600]
+    }
+  ],
+  "connections": {
+    "Scheduled Trigger (Every 5 min)": {
+      "main": [
+        [
+          {
+            "node": "Execute Market Analyzer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Market Analyzer": {
+      "main": [
+        [
+          {
+            "node": "Execute Script Writer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Script Writer": {
+      "main": [
+        [
+          {
+            "node": "Parallel (Assets)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parallel (Assets)": {
+      "main": [
+        [
+          {
+            "node": "Execute Image Generator",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Execute Video Clips Generator",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Execute Online Collector",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Execute Audio Collector",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Execute Voice-Over AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Image Generator": { "main": [[{ "node": "Execute Video Editor", "type": "main", "index": 0 }]] },
+    "Execute Video Clips Generator": { "main": [[{ "node": "Execute Video Editor", "type": "main", "index": 0 }]] },
+    "Execute Online Collector": { "main": [[{ "node": "Execute Video Editor", "type": "main", "index": 0 }]] },
+    "Execute Audio Collector": { "main": [[{ "node": "Execute Video Editor", "type": "main", "index": 0 }]] },
+    "Execute Voice-Over AI": { "main": [[{ "node": "Execute Video Editor", "type": "main", "index": 0 }]] },
+    "Execute Video Editor": {
+      "main": [
+        [
+          {
+            "node": "Execute Online Uploader",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Online Uploader": {
+      "main": [
+        [
+          {
+            "node": "Update Google Sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Email",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Execute Social Analyzer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "1",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+    }
