@@ -1,0 +1,91 @@
+{
+  "name": "script-writer",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "start",
+      "name": "Start",
+      "type": "n8n-nodes-base.start",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.override }}",
+              "operation": "equals",
+              "value2": "manual"
+            }
+          ]
+        }
+      },
+      "id": "mode-switch",
+      "name": "Mode Switch",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "const apis = [\n  { name: 'OpenAI GPT-4', url: 'https://api.openai.com/v1/chat/completions', key: 'sk-xxx1', score: 95 },\n  { name: 'Claude-3-Opus', url: 'https://api.anthropic.com/v1/messages', key: 'sk-xxx2', score: 92 },\n  { name: 'Gemini-Pro', url: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent', key: 'xxx3', score: 88 }\n];\nconst best = apis.sort((a,b)=>b.score - a.score)[0];\nreturn { ...best, prompt: $json.topic };"
+      },
+      "id": "auto-pick",
+      "name": "Auto Pick Best API",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [680, 200]
+    },
+    {
+      "parameters": {
+        "url": "={{$json.url}}",
+        "method": "POST",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": "={{\n  JSON.stringify({\n    model: $json.name.includes('GPT') ? 'gpt-4' : 'claude-3-opus-20240229',\n    messages: [{ role: 'user', content: `Write a 100-word script about ${$json.prompt}` }]\n  })\n}}"
+      },
+      "id": "http-request",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "return",
+      "name": "Return to Master",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1100, 300]
+    }
+  ],
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Mode Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mode Switch": {
+      "main": [
+        [
+          {
+            "node": "Auto Pick Best API",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request
