@@ -1,0 +1,75 @@
+{
+  "name": "slot-script-writer",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "start",
+      "name": "Start",
+      "type": "n8n-nodes-base.start",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            { "value1": "={{ $json.override }}", "operation": "equal", "value2": "manual" }
+          ]
+        }
+      },
+      "id": "if-manual",
+      "name": "Manual?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "/* Auto-select best API from list of up to 10 */\nconst apis = [\n  { name: 'OpenAI', url: 'https://api.openai.com/v1/chat/completions', key: 'sk-placeholder', score: 95 },\n  { name: 'Claude', url: 'https://api.anthropic.com/v1/messages', key: 'sk-placeholder', score: 90 }\n];\nconst best = apis.sort((a, b) => b.score - a.score)[0];\nreturn { ...best, topic: $json.topic };\n"
+      },
+      "id": "auto-choose",
+      "name": "Auto Choose API",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [680, 200]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "method": "POST",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "headers": { "Content-Type": "application/json" },
+        "body": "={\n  \"model\": \"gpt-4\",\n  \"messages\": [{\"role\":\"user\",\"content\":\"Write a 100-word script about \" + $json.topic}]\n}",
+        "options": {}
+      },
+      "id": "http-request",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [900, 300]
+    },
+    {
+      "parameters": { "options": {} },
+      "id": "return",
+      "name": "Return to Master",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1100, 300]
+    }
+  ],
+  "connections": {
+    "Start": { "main": [[{ "node": "Manual?", "type": "main", "index": 0 }]] },
+    "Manual?": {
+      "main": [
+        [{ "node": "Auto Choose API", "type": "main", "index": 0 }],
+        [{ "node": "HTTP Request", "type": "main", "index": 0 }]
+      ]
+    },
+    "Auto Choose API": { "main": [[{ "node": "HTTP Request", "type": "main", "index": 0 }]] },
+    "HTTP Request": { "main": [[{ "node": "Return to Master", "type": "main", "index": 0 }]] }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "1"
+}
